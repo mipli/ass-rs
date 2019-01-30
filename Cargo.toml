@@ -4,6 +4,11 @@ version = "0.8.0"
 authors = ["Michael A. Plikk <michael@plikk.com>"]
 description = "A library for working with Aptoma Smooth Storage"
 edition = "2018"
+license = "MIT"
+repository = "https://github.com/mipli/ass-rs"
+documentation = "https://docs.rs/septem/latest/ass-rs/"
+readme = "README.md"
+keywords = []
 
 [dependencies]
 serde = "1.0.85"
