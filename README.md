@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.com/mipli/ass-rs.svg?branch=master)](https://travis-ci.com/mipli/ass-rs)
+[![Crate](https://img.shields.io/crates/v/ass-rs.svg)](https://crates.io/crates/ass-rs)
+[![API](https://docs.rs/ass-rs/badge.svg)](https://docs.rs/ass-rs)
+
 # ASS-rs
 
 A library for working with Aptoma Smooth Storage.
