@@ -7,6 +7,11 @@ pub enum AssError {
         err: String,
         file: String,
     },
+    #[fail(display = "Error accessing file ({}): {}", file, err)]
+    InvalidFile {
+        err: String,
+        file: String
+    },
     #[fail(display = "Could not find: {}", file)]
     NotFound {
         err: String,

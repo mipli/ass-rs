@@ -28,11 +28,11 @@ impl Account {
     }
 
     pub fn url(&self) -> Url {
-        self.url.parse::<Url>().unwrap()
+        self.url.parse::<Url>().expect("Could not parse account URL")
     }
 
     pub fn url_string(&self) -> String {
-        self.url.parse::<Url>().unwrap().to_string()
+        self.url.parse::<Url>().expect("Could not parse account URL").to_string()
     }
 
     pub fn get_headers(&self) -> Result<HeaderMap, Error> {
@@ -72,15 +72,38 @@ impl Account {
             })
     }
 
-    pub fn upload_file<T: Into<PathBuf>>(
-        &self,
-        path: T,
-        destination: &str,
-    ) -> Result<AssData, Error> {
+    pub fn search_files(&self, queries: &[(&str, &str)]) -> Result<Vec<AssData>, Error> {
+        let client = reqwest::Client::builder()
+            .default_headers(self.get_headers()?)
+            .build()?;
+        let url = Url::parse(&self.url_string())?;
+        let url = url.join("files")?;
+        let url = Url::parse_with_params(url.as_str(), queries)?;
+
+        let mut res = client
+            .get(url)
+            .send()?;
+
+        let data: serde_json::Value = res.text()?.parse()?;
+        Ok(data.as_array().map_or(vec![], |arr| {
+            arr.iter().map(|a| {
+                AssData::new((*a).clone())
+            }).collect::<Vec<_>>()
+        }))
+    }
+
+    pub fn upload_file<T: Into<PathBuf>>(&self, path: T, destination: &str) -> Result<AssData, Error> {
         let path = path.into();
         let url = Url::parse(&self.url_string())?;
         let url = url.join(&format!("files/{}", destination))?;
-        let file_name = path.file_name().unwrap().to_str().unwrap();
+        let file_name = path
+            .file_name().ok_or_else(|| AssError::InvalidFile {
+                err: "Error parsing filename".to_string(),
+                file: path.to_str().unwrap().to_string() 
+            })?.to_str().ok_or_else(|| AssError::InvalidFile {
+                err: "Error parsing filename".to_string(),
+                file: path.to_str().unwrap().to_string() 
+            })?;
         let url = url.join(file_name)?;
 
         let form = Form::new().file("file", path)?;
