@@ -17,7 +17,7 @@ pub struct Account {
 }
 
 impl Account {
-    pub fn create<T: Into<String>>(url: T, name: T, apikey: T) -> Result<Self, Error> {
+    pub fn create<T: Into<String>, U: Into<String>, V: Into<String>>(url: T, name: U, apikey: V) -> Result<Self, Error> {
         let url = url.into();
         let _ = url.parse::<Url>()?;
         Ok(Account {
@@ -143,7 +143,7 @@ impl Account {
         let mut res = client
             .post(url)
             .multipart(form)
-            .header("Content-Type", format!("max-age: {}", expiration))
+            .header("Cache-Control", format!("max-age: {}", expiration))
             .send()? ;
 
         let data: AssData = res.text()?.parse()?;
