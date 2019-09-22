@@ -120,7 +120,7 @@ impl Account {
         Ok(data)
     }
 
-    pub fn upload_file_with_headers<T: Into<PathBuf>>(&self, path: T, destination: &str, headers: &[(&str, &str)]) -> Result<AssData, Error> {
+    pub fn upload_file_with_cache<T: Into<PathBuf>>(&self, path: T, destination: &str, expiration: u32) -> Result<AssData, Error> {
         let path = path.into();
         let url = Url::parse(&self.url_string())?;
         let url = url.join(&format!("files/{}", destination))?;
@@ -140,15 +140,12 @@ impl Account {
             .default_headers(self.get_headers()?)
             .build()?;
 
-        let mut builder = client
+        let mut res = client
             .post(url)
-            .multipart(form);
+            .multipart(form)
+            .header("Content-Type", format!("max-age: {}", expiration))
+            .send()? ;
 
-        for (k, v) in headers.iter() {
-            builder = builder.header(*k, *v);
-        }
-
-        let mut res = builder.send()?;
         let data: AssData = res.text()?.parse()?;
         Ok(data)
     }
