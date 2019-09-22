@@ -120,6 +120,39 @@ impl Account {
         Ok(data)
     }
 
+    pub fn upload_file_with_headers<T: Into<PathBuf>>(&self, path: T, destination: &str, headers: &[(&str, &str)]) -> Result<AssData, Error> {
+        let path = path.into();
+        let url = Url::parse(&self.url_string())?;
+        let url = url.join(&format!("files/{}", destination))?;
+        let file_name = path
+            .file_name().ok_or_else(|| AssError::InvalidFile {
+                err: "Error parsing filename".to_string(),
+                file: path.to_str().unwrap().to_string() 
+            })?.to_str().ok_or_else(|| AssError::InvalidFile {
+                err: "Error parsing filename".to_string(),
+                file: path.to_str().unwrap().to_string() 
+            })?;
+        let url = url.join(file_name)?;
+
+        let form = Form::new().file("file", path)?;
+
+        let client = reqwest::Client::builder()
+            .default_headers(self.get_headers()?)
+            .build()?;
+
+        let mut builder = client
+            .post(url)
+            .multipart(form);
+
+        for (k, v) in headers.iter() {
+            builder = builder.header(*k, *v);
+        }
+
+        let mut res = builder.send()?;
+        let data: AssData = res.text()?.parse()?;
+        Ok(data)
+    }
+
     pub fn get_file_url(&self, path: &str) -> Result<String, Error> {
         let url = Url::parse(&self.url_string())?;
         let url = url.join(&format!("users/{}/files/{}", self.name, path))?;
