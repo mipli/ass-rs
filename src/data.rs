@@ -1,7 +1,7 @@
-use std::fmt::{Display, Debug};
+use failure::Error;
+use serde_json::Value;
+use std::fmt::{Debug, Display};
 use std::str::FromStr;
-use serde_json::{Value};
-use failure::{Error};
 
 pub struct AssData(Value);
 
@@ -23,9 +23,7 @@ impl FromStr for AssData {
     type Err = Error;
     fn from_str(s: &str) -> Result<AssData, Error> {
         let data: Value = serde_json::from_str(s)?;
-        Ok(AssData {
-            0: data
-        })
+        Ok(AssData { 0: data })
     }
 }
 
@@ -37,7 +35,8 @@ impl Display for AssData {
 
 impl Debug for AssData {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        let s = serde_json::to_string_pretty(&self.0).unwrap_or_else(|_| "Invalid JSON".to_string());
+        let s =
+            serde_json::to_string_pretty(&self.0).unwrap_or_else(|_| "Invalid JSON".to_string());
         write!(fmt, "{}", s)
     }
 }
