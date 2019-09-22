@@ -17,7 +17,7 @@ pub struct Account {
 }
 
 impl Account {
-    pub fn create<T: Into<String>>(url: T, name: T, apikey: T) -> Result<Self, Error> {
+    pub fn create<T: Into<String>, U: Into<String>, V: Into<String>>(url: T, name: U, apikey: V) -> Result<Self, Error> {
         let url = url.into();
         let _ = url.parse::<Url>()?;
         Ok(Account {
@@ -116,6 +116,36 @@ impl Account {
             .post(url)
             .multipart(form)
             .send()?;
+        let data: AssData = res.text()?.parse()?;
+        Ok(data)
+    }
+
+    pub fn upload_file_with_cache<T: Into<PathBuf>>(&self, path: T, destination: &str, expiration: u32) -> Result<AssData, Error> {
+        let path = path.into();
+        let url = Url::parse(&self.url_string())?;
+        let url = url.join(&format!("files/{}", destination))?;
+        let file_name = path
+            .file_name().ok_or_else(|| AssError::InvalidFile {
+                err: "Error parsing filename".to_string(),
+                file: path.to_str().unwrap().to_string() 
+            })?.to_str().ok_or_else(|| AssError::InvalidFile {
+                err: "Error parsing filename".to_string(),
+                file: path.to_str().unwrap().to_string() 
+            })?;
+        let url = url.join(file_name)?;
+
+        let form = Form::new().file("file", path)?;
+
+        let client = reqwest::Client::builder()
+            .default_headers(self.get_headers()?)
+            .build()?;
+
+        let mut res = client
+            .post(url)
+            .multipart(form)
+            .header("Cache-Control", format!("max-age: {}", expiration))
+            .send()? ;
+
         let data: AssData = res.text()?.parse()?;
         Ok(data)
     }

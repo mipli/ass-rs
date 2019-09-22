@@ -11,10 +11,11 @@ readme = "README.md"
 keywords = []
 
 [dependencies]
+mockito = "0.20.0"
 serde = "1.0.85"
 serde_derive = "1.0.85"
 serde_json = "1.0.36"
-reqwest = "0.9.8"
+reqwest = "0.9.*"
 ring = "0.14.2"
 failure = "0.1.5"
 failure_derive = "0.1.5"
