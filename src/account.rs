@@ -173,7 +173,7 @@ impl Account {
         Ok(data)
     }
 
-    pub fn get_image_data(&self, image_id: u64) -> Result<AssData, AssError> {
+    pub fn get_image_information(&self, image_id: u64) -> Result<AssData, AssError> {
         let url = Url::parse(&self.url_string())?;
         let url = url.join(&format!("images/{}", image_id))?;
 
