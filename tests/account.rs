@@ -95,7 +95,7 @@ mod account_tests {
     }
 
     #[test]
-    fn test_file_upload_with_cache_header() {
+    fn test_file_upload_with_headers() {
         let _m = mockito::mock("POST", "/files/file-path/account.json")
             .match_header("Authorization", "bearer apikey")
             .match_header("Cache-Control", "max-age: 234")
@@ -110,7 +110,7 @@ mod account_tests {
         assert!(account.is_ok());
         let account = account.expect("Could not get Account");
 
-        let result = account.upload_file_with_cache("./data/account.json", "file-path/", 234);
+        let result = account.upload_file_with_headers("./data/account.json", "file-path/", &[("Cache-Control", "max-age: 234")]);
         assert!(result.is_ok());
         let result = result.expect("Could not get result");
         assert_eq!(result.get_id(), Some(2));

@@ -120,11 +120,11 @@ impl Account {
         Ok(data)
     }
 
-    pub fn upload_file_with_cache<T: Into<PathBuf>>(
+    pub fn upload_file_with_headers<T: Into<PathBuf>>(
         &self,
         path: T,
         destination: &str,
-        expiration: u32,
+        headers: &[(&str, &str)],
     ) -> Result<AssData, AssError> {
         let path = path.into();
         let url = Url::parse(&self.url_string())?;
@@ -138,11 +138,15 @@ impl Account {
             .default_headers(self.get_headers()?)
             .build()?;
 
-        let mut res = client
+        let mut builder = client
             .post(url)
-            .multipart(form)
-            .header("Cache-Control", format!("max-age: {}", expiration))
-            .send()?;
+            .multipart(form);
+
+        for (k, v) in headers {
+            builder = builder.header(*k, *v);
+        }
+
+        let mut res = builder.send()?;
 
         let data: AssData = res.text()?.parse()?;
         Ok(data)
