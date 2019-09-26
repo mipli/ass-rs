@@ -1,6 +1,6 @@
 [package]
 name = "ass-rs"
-version = "1.0.0"
+version = "2.0.0"
 authors = ["Michael A. Plikk <michael@plikk.com>"]
 description = "A library for working with Aptoma Smooth Storage"
 edition = "2018"
