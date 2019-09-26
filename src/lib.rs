@@ -27,4 +27,4 @@ mod error;
 
 pub use crate::account::Account;
 pub use crate::data::AssData;
-pub use crate::error::AssError;
+pub use crate::error::{AssError, AssErrorKind};

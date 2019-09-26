@@ -1,8 +1,7 @@
 #[cfg(test)]
 mod account_tests {
-    use ::ass_rs::Account;
+    use ass_rs::{Account, AssErrorKind};
     use mockito;
-    use reqwest::Url;
 
     #[test]
     fn create_account() {
@@ -55,9 +54,23 @@ mod account_tests {
         let account = account.expect("Could not get Account");
 
         let url = account
-            .sign_url("http://url.com/".parse::<Url>().unwrap())
+            .sign_url("http://url.com/name/image/2")
             .expect("Could not sign url");
-        assert_eq!(url.to_string(), "http://url.com/?accessToken=4fdc092b5d6a5fe805ed029cbb0dfc30a1d0fdc141a099a1e70bf49e81c8d4e3");
+        assert_eq!(url.to_string(), "http://url.com/name/image/2?accessToken=6ea029fcb85dd473116edbc80a500b99ef7f8c32dacbca51bf2be622a38ab6c9");
+    }
+
+    #[test]
+    fn sign_url_fails_on_wrong_account_url() {
+        let account = Account::from_file("./data/account.json");
+        let account = account.expect("Could not get Account");
+
+        match account.sign_url("http://url.com/foobar/images/") {
+            Err(e) => match e.kind {
+                AssErrorKind::UrlDoesNotMatchAccount(_) => assert!(true),
+                _ => assert!(false),
+            },
+            _ => assert!(false),
+        }
     }
 
     #[test]
