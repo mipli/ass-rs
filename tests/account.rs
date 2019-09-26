@@ -110,7 +110,11 @@ mod account_tests {
         assert!(account.is_ok());
         let account = account.expect("Could not get Account");
 
-        let result = account.upload_file_with_headers("./data/account.json", "file-path/", &[("Cache-Control", "max-age: 234")]);
+        let result = account.upload_file_with_headers(
+            "./data/account.json",
+            "file-path/",
+            &[("Cache-Control", "max-age: 234")],
+        );
         assert!(result.is_ok());
         let result = result.expect("Could not get result");
         assert_eq!(result.get_id(), Some(2));

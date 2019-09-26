@@ -138,9 +138,7 @@ impl Account {
             .default_headers(self.get_headers()?)
             .build()?;
 
-        let mut builder = client
-            .post(url)
-            .multipart(form);
+        let mut builder = client.post(url).multipart(form);
 
         for (k, v) in headers {
             builder = builder.header(*k, *v);
@@ -195,14 +193,11 @@ impl Account {
     }
 
     fn get_filename_from_path<'a>(&self, path: &'a PathBuf) -> Result<&'a str, AssError> {
-        path
-            .file_name()
-            .and_then(|s| s.to_str())
-            .ok_or_else(|| {
-                AssError::invalid_file_name(
-                    "Error parsing filename".to_string(),
-                    path.to_str().unwrap().to_string(),
-                )
-            })
+        path.file_name().and_then(|s| s.to_str()).ok_or_else(|| {
+            AssError::invalid_file_name(
+                "Error parsing filename".to_string(),
+                path.to_str().unwrap().to_string(),
+            )
+        })
     }
 }

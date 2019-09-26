@@ -20,7 +20,6 @@
 //! # }
 //!
 //! ```
-
 mod account;
 mod data;
 mod error;

@@ -35,6 +35,10 @@ impl Display for AssData {
 
 impl Debug for AssData {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(fmt, "{}", serde_json::to_string_pretty(&self.0).unwrap_or_else(|_| "Invalid JSON".to_string()))
+        write!(
+            fmt,
+            "{}",
+            serde_json::to_string_pretty(&self.0).unwrap_or_else(|_| "Invalid JSON".to_string())
+        )
     }
 }
