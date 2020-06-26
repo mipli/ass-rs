@@ -1,6 +1,7 @@
-use crate::{AssClient, AssError, FileData};
+use crate::{image_handling, AssClient, AssError, AssErrorKind, FileData, ImageData};
 use reqwest::multipart::Form;
 use reqwest::Url;
+use serde_json::Value;
 use std::path::PathBuf;
 
 pub fn search(ass_client: &AssClient, queries: &[(&str, &str)]) -> Result<Vec<FileData>, AssError> {
@@ -73,29 +74,18 @@ pub fn get_file_url(ass_client: &AssClient, path: &str) -> Result<String, AssErr
     Ok(url.to_string())
 }
 
-pub fn get_file_information(ass_client: &AssClient, file_id: u64) -> Result<FileData, AssError> {
+pub fn get_file_information(ass_client: &AssClient, path: &str) -> Result<FileData, AssError> {
     let url = Url::parse(&ass_client.url_string())?;
-    let url = url.join(&format!("files/{}", file_id))?;
-
+    let url = url.join(&format!("files/path/{}", path))?;
     let client = reqwest::Client::builder()
         .default_headers(ass_client.get_headers()?)
         .build()?;
     let mut res = client.get(url).send()?;
-    res.text()?.parse()
+    let data: FileData = res.json()?;
+    Ok(data)
 }
 
-pub fn get_file_analysis(ass_client: &AssClient, file_id: u64) -> Result<FileData, AssError> {
-    let url = Url::parse(&ass_client.url_string())?;
-    let url = url.join(&format!("files/{}/analysis", file_id))?;
-
-    let client = reqwest::Client::builder()
-        .default_headers(ass_client.get_headers()?)
-        .build()?;
-    let mut res = client.get(url).send()?;
-    res.text()?.parse()
-}
-
-pub fn get_file_render(ass_client: &AssClient, file_id: u64) -> Result<FileData, AssError> {
+pub fn get_file_rendition(ass_client: &AssClient, file_id: u64) -> Result<ImageData, AssError> {
     let url = Url::parse(&ass_client.url_string())?;
     let url = url.join(&format!("files/{}/image", file_id))?;
 
@@ -103,21 +93,31 @@ pub fn get_file_render(ass_client: &AssClient, file_id: u64) -> Result<FileData,
         .default_headers(ass_client.get_headers()?)
         .build()?;
     let mut res = client.get(url).send()?;
-    res.text()?.parse()
+
+    let data: Value = res.json()?;
+    image_handling::get_image_information(
+        ass_client,
+        data.get("image_id")
+            .ok_or_else(|| AssError::from(AssErrorKind::JsonError))?
+            .as_u64()
+            .ok_or_else(|| AssError::from(AssErrorKind::JsonError))?,
+    )
 }
 
 fn get_filename_from_path(path: &PathBuf) -> Result<&str, AssError> {
     path.file_name().and_then(|s| s.to_str()).ok_or_else(|| {
         AssError::invalid_file_name(
             "Error parsing filename".to_string(),
-            path.to_str().unwrap().to_string(),
+            path.to_str()
+                .expect("PathBuf failed conversion to str")
+                .to_string(),
         )
     })
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{file_handling, AssClient, AssErrorKind};
+    use crate::{file_handling, AssClient};
     use mockito;
 
     #[test]
