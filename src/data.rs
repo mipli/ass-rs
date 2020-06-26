@@ -1,44 +1,62 @@
 use crate::AssError;
-use serde_json::Value;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display};
 use std::str::FromStr;
 
-pub struct AssData(Value);
-
-impl AssData {
-    pub fn new(v: Value) -> Self {
-        AssData(v)
-    }
-
-    pub fn get_id(&self) -> Option<u64> {
-        self.0.get("id")?.as_u64()
-    }
-
-    pub fn get_path(&self) -> Option<&str> {
-        self.0.get("path")?.as_str()
-    }
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ImageData {
+    pub id: u64,
+    pub user_id: u64,
+    pub md5: String,
+    pub original_url: String,
+    pub width: u64,
+    pub height: u64,
+    pub name: String,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub author: Option<String>,
+    pub source_url: Option<String>,
+    pub created: DateTime<Utc>,
+    pub updated: DateTime<Utc>,
 }
 
-impl FromStr for AssData {
+impl FromStr for ImageData {
     type Err = AssError;
-    fn from_str(s: &str) -> Result<AssData, AssError> {
-        let data: Value = serde_json::from_str(s)?;
-        Ok(AssData { 0: data })
+    fn from_str(s: &str) -> Result<ImageData, AssError> {
+        let data: ImageData = serde_json::from_str(s)?;
+        Ok(data)
     }
 }
 
-impl Display for AssData {
+impl Display for ImageData {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         write!(fmt, "{:?}", self)
     }
 }
 
-impl Debug for AssData {
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct FileData {
+    pub id: u64,
+    pub user_id: u64,
+    pub path: String,
+    pub md5: String,
+    pub content_type: String,
+    pub original_url: String,
+    pub created: DateTime<Utc>,
+    pub updated: DateTime<Utc>,
+}
+
+impl FromStr for FileData {
+    type Err = AssError;
+    fn from_str(s: &str) -> Result<FileData, AssError> {
+        let data: FileData = serde_json::from_str(s)?;
+        Ok(data)
+    }
+}
+
+impl Display for FileData {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(
-            fmt,
-            "{}",
-            serde_json::to_string_pretty(&self.0).unwrap_or_else(|_| "Invalid JSON".to_string())
-        )
+        write!(fmt, "{:?}", self)
     }
 }
