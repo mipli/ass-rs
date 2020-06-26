@@ -3,7 +3,7 @@ use reqwest::multipart::Form;
 use reqwest::Url;
 use std::path::PathBuf;
 
-pub fn upload_image<T: Into<PathBuf>>(
+pub async fn upload_image<T: Into<PathBuf>>(
     ass_client: &AssClient,
     path: T,
 ) -> Result<ImageData, AssError> {
@@ -11,25 +11,31 @@ pub fn upload_image<T: Into<PathBuf>>(
     let url = Url::parse(&ass_client.url_string())?;
     let url = url.join("images")?;
 
-    let form = Form::new().file("file", path)?;
+    let stream = std::fs::read(path).unwrap();
+    let form = Form::new().part("file", reqwest::multipart::Part::stream(stream));
 
     let client = reqwest::Client::builder()
         .default_headers(ass_client.get_headers()?)
         .build()?;
 
-    let mut res = client.post(url).multipart(form).send()?;
-    res.text()?.parse()
+    let res = client.post(url).multipart(form).send().await?;
+    let data: ImageData = res.json().await?;
+    Ok(data)
 }
 
-pub fn get_image_information(ass_client: &AssClient, image_id: u64) -> Result<ImageData, AssError> {
+pub async fn get_image_information(
+    ass_client: &AssClient,
+    image_id: u64,
+) -> Result<ImageData, AssError> {
     let url = Url::parse(&ass_client.url_string())?;
     let url = url.join(&format!("images/{}", image_id))?;
 
     let client = reqwest::Client::builder()
         .default_headers(ass_client.get_headers()?)
         .build()?;
-    let mut res = client.get(url).send()?;
-    res.text()?.parse()
+    let res = client.get(url).send().await?;
+    let data: ImageData = res.json().await?;
+    Ok(data)
 }
 
 pub fn get_image_url(ass_client: &AssClient, id: u64) -> Result<String, AssError> {

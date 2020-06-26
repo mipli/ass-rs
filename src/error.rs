@@ -74,8 +74,8 @@ impl From<reqwest::Error> for AssError {
     }
 }
 
-impl From<reqwest::UrlError> for AssError {
-    fn from(err: reqwest::UrlError) -> AssError {
+impl From<url::ParseError> for AssError {
+    fn from(err: url::ParseError) -> AssError {
         AssError {
             kind: AssErrorKind::InvalidUrl,
             source: Some(Box::new(err)),
