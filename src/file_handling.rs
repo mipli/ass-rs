@@ -84,6 +84,20 @@ pub fn get_file_url(ass_client: &AssClient, path: &str) -> Result<String, AssErr
     Ok(url.to_string())
 }
 
+pub async fn get_file_information_by_id(
+    ass_client: &AssClient,
+    id: u64,
+) -> Result<FileData, AssError> {
+    let url = Url::parse(&ass_client.url_string())?;
+    let url = url.join(&format!("files/{}", id))?;
+    let client = reqwest::Client::builder()
+        .default_headers(ass_client.get_headers()?)
+        .build()?;
+    let res = client.get(url).send().await?;
+    let data: FileData = res.json().await?;
+    Ok(data)
+}
+
 pub async fn get_file_information(
     ass_client: &AssClient,
     path: &str,
