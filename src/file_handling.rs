@@ -33,7 +33,7 @@ pub async fn upload_file<T: Into<PathBuf>>(
     let file_name = get_filename_from_path(&path)?;
     let url = url.join(file_name)?;
 
-    let stream = std::fs::read(path).unwrap();
+    let stream = std::fs::read(path)?;
     let form = Form::new().part("file", reqwest::multipart::Part::stream(stream));
 
     let client = reqwest::Client::builder()
@@ -58,7 +58,7 @@ pub async fn upload_file_with_headers<T: Into<PathBuf>>(
     let file_name = get_filename_from_path(&path)?;
     let url = url.join(file_name)?;
 
-    let stream = std::fs::read(path).unwrap();
+    let stream = std::fs::read(path)?;
     let form = Form::new().part("file", reqwest::multipart::Part::stream(stream));
 
     let client = reqwest::Client::builder()
@@ -98,7 +98,7 @@ pub async fn get_file_information_by_id(
     Ok(data)
 }
 
-pub async fn get_file_information(
+pub async fn get_file_information_by_path(
     ass_client: &AssClient,
     path: &str,
 ) -> Result<FileData, AssError> {

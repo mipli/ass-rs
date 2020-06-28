@@ -11,7 +11,7 @@ pub async fn upload_image<T: Into<PathBuf>>(
     let url = Url::parse(&ass_client.url_string())?;
     let url = url.join("images")?;
 
-    let stream = std::fs::read(path).unwrap();
+    let stream = std::fs::read(path)?;
     let form = Form::new().part("file", reqwest::multipart::Part::stream(stream));
 
     let client = reqwest::Client::builder()
