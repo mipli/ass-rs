@@ -20,6 +20,7 @@
 //! # }
 //!
 //! ```
+
 mod client;
 mod data;
 mod error;

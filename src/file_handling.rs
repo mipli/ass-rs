@@ -1,9 +1,14 @@
+//!
+//! Module for working with files in smooth storage
+//!
+
 use crate::{image_handling, AssClient, AssError, AssErrorKind, FileData, ImageData};
 use reqwest::multipart::Form;
 use reqwest::Url;
 use serde_json::Value;
 use std::path::PathBuf;
 
+/// Search for files
 pub async fn search(
     ass_client: &AssClient,
     queries: &[(&str, &str)],
@@ -22,6 +27,7 @@ pub async fn search(
     Ok(data)
 }
 
+/// Upload file without any headers
 pub async fn upload_file<T: Into<PathBuf>>(
     ass_client: &AssClient,
     path: T,
@@ -46,6 +52,7 @@ pub async fn upload_file<T: Into<PathBuf>>(
     Ok(data)
 }
 
+/// Upload file with defaults headers
 pub async fn upload_file_with_headers<T: Into<PathBuf>>(
     ass_client: &AssClient,
     path: T,
@@ -77,6 +84,7 @@ pub async fn upload_file_with_headers<T: Into<PathBuf>>(
     Ok(data)
 }
 
+/// Gets signed url for a file on the given path
 pub fn get_file_url(ass_client: &AssClient, path: &str) -> Result<String, AssError> {
     let url = Url::parse(&ass_client.url_string())?;
     let url = url.join(&format!("users/{}/files/{}", ass_client.name, path))?;
@@ -84,6 +92,7 @@ pub fn get_file_url(ass_client: &AssClient, path: &str) -> Result<String, AssErr
     Ok(url.to_string())
 }
 
+/// Returns file information, queried by id
 pub async fn get_file_information_by_id(
     ass_client: &AssClient,
     id: u64,
@@ -98,6 +107,7 @@ pub async fn get_file_information_by_id(
     Ok(data)
 }
 
+/// Returns file information, queried by path
 pub async fn get_file_information_by_path(
     ass_client: &AssClient,
     path: &str,
@@ -112,6 +122,7 @@ pub async fn get_file_information_by_path(
     Ok(data)
 }
 
+/// Returns a default image rendition of a file
 pub async fn get_file_rendition(
     ass_client: &AssClient,
     file_id: u64,

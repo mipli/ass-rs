@@ -1,8 +1,13 @@
+//!
+//! Module for working with images in smooth storage
+//!
+
 use crate::{AssClient, AssError, ImageData};
 use reqwest::multipart::Form;
 use reqwest::Url;
 use std::path::PathBuf;
 
+/// Upload an image to smooth storage
 pub async fn upload_image<T: Into<PathBuf>>(
     ass_client: &AssClient,
     path: T,
@@ -23,6 +28,7 @@ pub async fn upload_image<T: Into<PathBuf>>(
     Ok(data)
 }
 
+/// Fetch image information
 pub async fn get_image_information(
     ass_client: &AssClient,
     image_id: u64,
@@ -38,6 +44,7 @@ pub async fn get_image_information(
     Ok(data)
 }
 
+/// Get signed image url based on image id
 pub fn get_image_url(ass_client: &AssClient, id: u64) -> Result<String, AssError> {
     let url = Url::parse(&ass_client.url_string())?;
     let url = url.join(&format!("users/{}/images/{}.jpg", ass_client.name, id))?;

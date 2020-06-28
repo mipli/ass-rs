@@ -7,6 +7,26 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 
+///
+/// Client talking to Aptoma Smooth Storage.
+///
+/// Client contains authentication information and functions for a few basic actions. Most
+/// communcation will be done using the `file_handling` and `image_handling` modules.
+///
+/// ```rust
+/// # use ass_rs::AssError;
+/// # fn main() -> Result<(), AssError> {
+/// use ass_rs::{AssClient};
+///
+/// let ass_client = AssClient::create("https://storage.url.com", "username", "password")?;
+///
+/// let signed_url = ass_client.sign_url("https://storage.url.com/users/username/image/5.jpg")?;
+/// assert_eq!(signed_url.to_string(), "https://storage.url.com/users/username/image/5.jpg?accessToken=462082d1754bd61893094a26763480e745c679be31a483c25268205eaa7ccb08");
+///
+/// # Ok(())
+/// # }
+/// ```
+///
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AssClient {
     url: String,
@@ -15,6 +35,7 @@ pub struct AssClient {
 }
 
 impl AssClient {
+    /// Create a new client based on suppied `url`, `name` and `password`
     pub fn create<T: Into<String>, U: Into<String>, V: Into<String>>(
         url: T,
         name: U,
@@ -29,6 +50,7 @@ impl AssClient {
         })
     }
 
+    /// Create a new client, fetch `url`, `name` and `password` from account file at the given path
     pub fn from_file<T: Into<PathBuf>>(path: T) -> Result<Self, AssError> {
         let path = path.into();
         let mut file = File::open(&path)?;
@@ -43,12 +65,14 @@ impl AssClient {
         })
     }
 
+    /// Fetch the client's base url
     pub fn url(&self) -> Url {
         self.url
             .parse::<Url>()
             .expect("Could not parse account URL")
     }
 
+    /// Fetch the client's base url as `String`
     pub fn url_string(&self) -> String {
         self.url
             .parse::<Url>()
@@ -56,7 +80,8 @@ impl AssClient {
             .to_string()
     }
 
-    pub fn get_headers(&self) -> Result<HeaderMap, AssError> {
+    /// Fetch base headers to use when interacting with the smooth storage
+    pub(crate) fn get_headers(&self) -> Result<HeaderMap, AssError> {
         let mut headers = HeaderMap::new();
         headers.insert("Authorization", format!("bearer {}", self.apikey).parse()?);
         headers.insert("Accept", "application/json".parse()?);
@@ -65,6 +90,8 @@ impl AssClient {
         Ok(headers)
     }
 
+    /// Sign the given url using the client's credentials.
+    /// Ensures that the url matches the client's credentials before signing
     pub fn sign_url(&self, url: &str) -> Result<Url, AssError> {
         let key = hmac::SigningKey::new(&digest::SHA256, &self.apikey.as_bytes());
         let signature = hmac::sign(&key, url.as_bytes());

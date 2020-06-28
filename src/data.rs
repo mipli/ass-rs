@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display};
 use std::str::FromStr;
 
+/// Data representation of images stored on smooth storage
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ImageData {
     pub id: u64,
@@ -35,6 +36,7 @@ impl Display for ImageData {
     }
 }
 
+/// Data representation of files stored on smooth storage
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct FileData {
     pub id: u64,
