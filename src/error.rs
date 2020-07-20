@@ -2,6 +2,7 @@ use derive_more::*;
 
 use std::error::Error;
 
+/// The ASS error type, use the `.kind` value to check the cause of the error
 #[derive(Debug, Display)]
 #[display(fmt = "{}", kind)]
 pub struct AssError {
@@ -29,6 +30,7 @@ pub enum AssErrorKind {
 }
 
 impl AssError {
+    /// Creates an error indicating that a url does not match the client's base url
     pub fn url_does_not_match_account(url: String) -> Self {
         AssError {
             kind: AssErrorKind::UrlDoesNotMatchAccount(url),
@@ -36,6 +38,7 @@ impl AssError {
         }
     }
 
+    /// Creates an error indicating that we could not find a given file
     pub fn invalid_file_name(err: String, file: String) -> Self {
         AssError {
             kind: AssErrorKind::InvalidFileName { err, file },
@@ -43,6 +46,7 @@ impl AssError {
         }
     }
 
+    /// Creates an error indicating that account file was invalid
     pub fn invalid_account_file(err: String, file: String) -> Self {
         AssError {
             kind: AssErrorKind::InvalidAccountFile { err, file },
@@ -74,8 +78,8 @@ impl From<reqwest::Error> for AssError {
     }
 }
 
-impl From<reqwest::UrlError> for AssError {
-    fn from(err: reqwest::UrlError) -> AssError {
+impl From<url::ParseError> for AssError {
+    fn from(err: url::ParseError) -> AssError {
         AssError {
             kind: AssErrorKind::InvalidUrl,
             source: Some(Box::new(err)),

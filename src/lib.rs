@@ -4,26 +4,29 @@
 //!
 //! # Examples
 //! ```ignore
-//! use ass_rs::{Account, AssError};
+//! use ass_rs::{AssClient, AssError, file_handling, image_handling};
 //!
 //! # fn main() -> Result<(), AssError> {
 //!
-//! let account = Account::create("https://url-to-storage", "account-name", "secretkey")?;
+//! let ass_client = AssClient::create("https://url-to-storage", "account-name", "secretkey")?;
 //!
-//! let image_url = account.get_image_url(123)?;
-//! let image_data = account.get_image_data(123)?;
+//! let image_url = image_handling::get_image_url(&ass_client, 123)?;
+//! let image_data = image_handling::get_image_data(&ass_client, 123)?;
 //!
-//! let file_data = account.upload_file("/data/file.pdf", "/destination")?;
-//! let image_data = account.upload_image("/data/image.jpg")?;
+//! let file_data = file_handling::upload_file(&ass_client, "/data/file.pdf", "/destination")?;
+//! let image_data = file_handling::upload_image(&ass_client, "/data/image.jpg")?;
 //!
 //! # Ok(())
 //! # }
 //!
 //! ```
-mod account;
+
+mod client;
 mod data;
 mod error;
+pub mod file_handling;
+pub mod image_handling;
 
-pub use crate::account::Account;
-pub use crate::data::AssData;
+pub use crate::client::AssClient;
+pub use crate::data::{FileData, ImageData};
 pub use crate::error::{AssError, AssErrorKind};
